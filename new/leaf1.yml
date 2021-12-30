@@ -1,0 +1,218 @@
+set:
+  system:
+    hostname: leaf1
+    global:
+      anycast-mac: 44:38:39:BE:EF:AA
+  interface:
+    lo:
+      ip:
+        address:
+          10.10.10.1/32: {}
+      type: loopback
+    swp1:
+      type: swp
+    swp2:
+      type: swp
+    swp3:
+      type: swp
+    bond1:
+      bond:
+        lacp-bypass: on
+        member:
+          swp1: {}
+      bridge:
+        domain:
+          br_default:
+            access: 10
+      evpn:
+        multihoming:
+          segment:
+            df-preference: 50000
+            enable: on
+            local-id: 1
+            mac-address: 44:38:39:BE:EF:AA
+      link:
+        mtu: 9000
+      type: bond
+    bond2:
+      bond:
+        lacp-bypass: on
+        member:
+          swp2: {}
+      bridge:
+        domain:
+          br_default:
+            access: 20
+      evpn:
+        multihoming:
+          segment:
+            df-preference: 50000
+            enable: on
+            local-id: 2
+            mac-address: 44:38:39:BE:EF:AA
+      link:
+        mtu: 9000
+      type: bond
+    bond3:
+      bond:
+        lacp-bypass: on
+        member:
+          swp3: {}
+      bridge:
+        domain:
+          br_default:
+            access: 30
+      evpn:
+        multihoming:
+          segment:
+            df-preference: 50000
+            enable: on
+            local-id: 3
+            mac-address: 44:38:39:BE:EF:AA
+      link:
+        mtu: 9000
+      type: bond
+    swp51:
+      evpn:
+        multihoming:
+          uplink: on
+      type: swp
+    swp52:
+      evpn:
+        multihoming:
+          uplink: on
+      type: swp
+    vlan10:
+      type: svi
+      vlan: 10
+      ip:
+        address:
+          10.1.10.2/24: {}
+        vrf: RED
+        vrr:
+          address:
+            10.1.10.1/24: {}
+          enable: on
+          mac-address: 00:00:00:00:00:10
+          state:
+            up: {}
+    vlan20:
+      type: svi
+      vlan: 20
+      ip:
+        address:
+          10.1.20.2/24: {}
+        vrf: RED
+        vrr:
+          address:
+            10.1.20.1/24: {}
+          enable: on
+          mac-address: 00:00:00:00:00:20
+          state:
+            up: {}
+    vlan30:
+      type: svi
+      vlan: 30
+      ip:
+        address:
+          10.1.30.2/24: {}
+        vrf: BLUE
+        vrr:
+          address:
+            10.1.30.1/24: {}
+          enable: on
+          mac-address: 00:00:00:00:00:30
+          state:
+            up: {}
+  bridge:
+    domain:
+      br_default:
+        vlan:
+          "10":
+            vni:
+              "10": {}
+          "20":
+            vni:
+              "20": {}
+          "30":
+            vni:
+              "30": {}
+  evpn:
+    enable: on
+    multihoming:
+      enable: on
+  router:
+    bgp:
+      autonomous-system: 65101
+      enable: on
+      router-id: 10.10.10.1
+    vrr:
+      enable: on
+  vrf:
+    default:
+      router:
+        bgp:
+          address-family:
+            ipv4-unicast:
+              enable: on
+              redistribute:
+                connected:
+                  enable: on
+          neighbor:
+            swp51:
+              peer-group: underlay
+              type: unnumbered
+            swp52:
+              peer-group: underlay
+              type: unnumbered
+          peer-group:
+            underlay:
+              address-family:
+                l2vpn-evpn:
+                  enable: on
+              remote-as: external
+          enable: on
+    RED:
+      router:
+        bgp:
+          address-family:
+            ipv4-unicast:
+              enable: on
+              route-export:
+                to-evpn:
+                  enable: on
+              redistribute:
+                connected:
+                  enable: on
+          autonomous-system: 65101
+          enable: on
+          router-id: 10.10.10.1
+      evpn:
+        enable: on
+        vni:
+          "4001": {}
+    BLUE:
+      router:
+        bgp:
+          address-family:
+            ipv4-unicast:
+              enable: on
+              route-export:
+                to-evpn:
+                  enable: on
+              redistribute:
+                connected:
+                  enable: on
+          autonomous-system: 65101
+          enable: on
+          router-id: 10.10.10.1
+      evpn:
+        enable: on
+        vni:
+          "4002": {}
+  nve:
+    vxlan:
+      arp-nd-suppress: on
+      enable: on
+      source:
+        address: 10.10.10.1

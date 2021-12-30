@@ -1,0 +1,54 @@
+set:     
+  system:
+    hostname: spine2
+  interface:
+    lo:
+      ip:
+        address:
+          10.10.10.102/32: {}
+      type: loopback
+    swp1:
+      type: swp
+    swp2:
+      type: swp
+    swp3:
+      type: swp
+    swp4:
+      type: swp
+  router:
+    bgp:
+      autonomous-system: 65199
+      enable: on
+      router-id: 10.10.10.102
+  vrf:
+    default:
+      router:
+        bgp:
+          address-family:
+            ipv4-unicast:
+              enable: on
+              redistribute:
+                connected:
+                  enable: on
+            l2vpn-evpn:
+              enable: on
+          enable: on
+          neighbor:
+            swp1:
+              peer-group: underlay
+              type: unnumbered
+            swp2:
+              peer-group: underlay
+              type: unnumbered
+            swp3:
+              peer-group: underlay
+              type: unnumbered
+            swp4:
+              peer-group: underlay
+              type: unnumbered
+          peer-group:
+            underlay:
+              address-family:
+                l2vpn-evpn:
+                  enable: on
+              remote-as: external
